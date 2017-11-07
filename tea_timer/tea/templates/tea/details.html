@@ -1,0 +1,115 @@
+{% extends 'tea/base.html' %}
+{% block title %}{{ album }}{% endblock %}
+{% block albums_active %}active{% endblock %}
+
+{% block body %}
+
+<!-- Left Tea Info -->
+    <div class="col-sm-4 col-md-3">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <a href="{% url 'tea:detail' tea.id %}">
+                    {% if tea.picture.url %}
+                        <img src="{{ tea.picture.url }}" class="img-responsive">
+                    {% else %}
+                        <h3>No image to display</h3>
+                    {% endif %}
+                </a>
+                <h1>{{ tea.name }}</h1>
+                <h2><strong>{{ tea.type }}</strong></h2>
+                <h3>${{ tea.price }}</h3>
+                <!-- Put the rest of the info in here for the tea when you get the chance -->
+                <h4>Rating: {{ tea.rating }}</h4>
+                <h4>Origin: {{ tea.origin }}</h4>
+                <p>Notes: {{ tea.tasting_notes }}</p>
+
+                <div class="caption">
+                    <!-- View Details -->
+                    <a href="{% url 'tea:tea-update' tea.id %}" class="btn btn-primary btn-sm" role="button">Edit Details</a>
+
+                    <!-- Delete Tea -->
+                    <form action="{% url 'tea:tea-delete' tea.pk %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="tea_id" value="{{ tea.id }}" />
+                        <button type="submit" class="btn btn-default btn-sm">
+                            <span class="glyphicon glyphicon-trash"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Right Brewing Info -->
+        <div class="col-sm-8 col-md-9">
+
+            <ul class="nav nav-pills" style="margin-bottom: 10px;">
+                <li role="presentation" class="active"><a href="{% url 'tea:gfbrew-add' tea.id %}">Add New Brew</a></li>
+                <li role="presentation" class="active"><a href="{% url 'tea:gfbrew-update' 10 %}">Update a Brew</a></li>
+            </ul>
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+                    <h3>All Brews</h3>
+
+                    {% if error_message %}
+                        <p><strong>{{ error_message }}</strong></p>
+                    {% endif %}
+
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Brew Type</th>
+                            <th>Start Tea Sesh</th>
+                            <th>Brew Temperature</th>
+                            <th>Tea Quantity</th>
+                            <th>Water Quantity</th>
+                            <th>Steep Cycles</th>
+                            <th>Edit Brew</th>
+                            <th>Delete Brew</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for gf_brew in tea.gongfubrew_set.all %}
+                            <tr>
+                                <td>{{ gf_brew.brew_name }}</td>
+                                <td>Gong Fu Brew</td>
+                                <td>
+                                    <a target="_blank" href="#">
+                                        <button type="button" class="btn btn-success btn-xs">
+                                            <span class="glyphicon glyphicon-play"></span>&nbsp; Start
+                                        </button>
+                                    </a>
+                                </td>
+                                <td>{{ gf_brew.temp_C }}</td>
+                                <td>{{ gf_brew.tea_qty }}</td>
+                                <td>{{ gf_brew.gaiwan_size }}</td>
+                                <td>{{ gf_brew.steep_num }}</td>
+                                <td>
+                                    <form action="{% url 'tea:gfbrew-update' gf_brew.id %}" method="get">
+                                        <button type="submit" class="btn btn-warning btn-xs">
+                                            <span class="glyphicon glyphicon-edit"></span> Edit
+                                        </button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form action="{% url 'tea:gfbrew-delete' brew_id=gf_brew.id %}" method="post" style="display: inline;">
+                                        <input type="hidden" name="gongfu_brew_id" value="{{ gf_brew.id }}" />
+                                        <button type="submit" class="btn btn-danger btn-xs">
+                                            <span class="glyphicon glyphicon-trash"></span> Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+{% endblock %}
