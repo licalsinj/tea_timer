@@ -1,0 +1,16 @@
+{% extends 'tea/base.html' %}
+
+{% block title %}See you!{% endblock %}
+
+{% block body %}
+  <div class="col-sm-4 col-md-2">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2>Logged Out</h2>
+            </div>
+            <div class="panel-body">
+                <p>You have been successfully logged out.</p>
+                <p><a href="{% url 'login' %}">Log in</a> again.</p>
+            </div>
+
+{% endblock %}
