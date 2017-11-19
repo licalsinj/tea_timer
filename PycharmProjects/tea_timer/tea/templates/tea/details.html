@@ -77,11 +77,11 @@
                                 <td>{{ gf_brew.brew_name }}</td>
                                 <td>Gong Fu Brew</td>
                                 <td>
-                                    <a target="_blank" href="#">
-                                        <button type="button" class="btn btn-success btn-xs">
-                                            <span class="glyphicon glyphicon-play"></span>&nbsp; Start
+                                    <form action="{% url 'tea:gfbrew-steep' gf_brew.id %}" method="get">
+                                        <button type="submit" class="btn btn-success btn-xs">
+                                            <span class="glyphicon glyphicon-play"></span> Start
                                         </button>
-                                    </a>
+                                    </form>
                                 </td>
                                 <td>{{ gf_brew.temp_C }}</td>
                                 <td>{{ gf_brew.tea_qty }}</td>

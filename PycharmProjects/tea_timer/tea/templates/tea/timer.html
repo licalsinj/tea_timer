@@ -1,0 +1,62 @@
+{% extends 'tea/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    <!--This is the overview -->
+    <div class="col-sm-4 col-md-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <H2>Start brew for: {{ brew.brew_name }}</H2>
+            </div>
+            <div class="panel-body">
+                <p>Timer Here</p>
+                <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Steep Number</th>
+                                <th>Steep Time</th>
+                                <th>Completed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for steep_time in steep_times %}
+                            <tr>
+                                <td>{{ steep_time.order }}{{ steep_time.suffix }}</td>
+                                <td>{{ steep_time.time }}</td>
+                                <td>
+                                    <form name="{{ steep_time.order }}{{ steep_time.suffix }}_brew">
+                                        <input id="start_{{ steep_time.order }}{{ steep_time.suffix }}_brew"
+                                                type="button" class="btn btn-success btn-xs"
+                                                onclick="setupTimer({{ steep_time.time }},
+                                                        start_{{ steep_time.order }}{{ steep_time.suffix }}_brew)"
+                                               value="Brew"/>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!--This is the Timer -->
+    <div class="col-sm-8 col-md-9">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <H2>This is the Timer:</H2>
+            </div>
+            <div class="panel-body">
+                <script>
+                    setInterval("runTimer()", 1000);
+                  </script>
+                    <form name="steep_info">
+                        <div id="start_button" hidden="true"><button type="button" class="btn btn-success btn-xs" onClick="startTimer()">
+                            <span class="glyphicon glyphicon-play"></span> Start
+                        </button></div>
+                        <div id="pause"></div>
+                    </form>
+                    <div id="output"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

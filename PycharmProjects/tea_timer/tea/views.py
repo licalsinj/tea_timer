@@ -11,7 +11,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.db.models import Q
 import re
 import numpy as np
-from django.http import JsonResponse
+from django.db import models
 
 # Create your views here.
 
@@ -107,41 +107,25 @@ class TeaDelete(DeleteView):
     return render(request, 'tea/gongfubrew_form.html', context)'''
 
 
-'''def update_gfbrew(request, pk):
-    form = GongFuBrewForm(request.POST or None)
+def update_gfbrew(request, pk):
     brew = get_object_or_404(GongFuBrew, pk=pk)
-    form.tea = brew.tea
-    form.brew_name = brew.brew_name
-    form.gaiwan_size = brew.gaiwan_size
-    form.temp_C = brew.temp_C
-    form.tea_qty = brew.tea_qty
-    form.steep_times_string = brew.steep_times_string
-    form.fields.brew_name = brew.brew_name
+    form = GongFuBrewForm(request.POST or None, instance=brew)
     if form.is_valid():
         brew = form.save(commit=False)
+        steep_times_string = form.clean_steep_times_string()
+        str_steep_times = re.split(',+', steep_times_string)
+        lst_steep_times = [int(x) for x in str_steep_times]
+        brew.steep_times = np.asarray(lst_steep_times)
+        brew.steep_num = len(brew.steep_times)
         brew.save()
-        return HttpResponseRedirect(reverse('tea:detail', args=str(brew.tea.id)))
+        return HttpResponseRedirect(reverse('tea:detail', args=[brew.tea.id]))
     context = {
         'brew': brew,
         'tea': brew.tea,
         'form': form,
         'title': "Update " + brew.brew_name,
     }
-    return render(request, 'tea/gongfubrew_form.html', context)'''
-
-
-class GongFuBrewUpdate(UpdateView):
-    model = GongFuBrew
-    fields = ['brew_name', 'gaiwan_size', 'temp_C', 'tea_qty', 'steep_times_string']
-    template_name = 'tea/gongfubrew_form.html'
-
-    def get_success_url(self):
-        brew = GongFuBrew.objects.get(id=self.kwargs["pk"])
-        return reverse_lazy('tea:detail', args=[brew.tea_id])
-
-    def form_valid(self, form):
-        steep_times_string = form.clean_steep_times_string()
-        return super(GongFuBrewUpdate, self).form_valid(form)
+    return render(request, 'tea/gongfubrew_form.html', context)
 
 
 def delete_gfbrew(request, brew_id):
@@ -157,10 +141,7 @@ def create_gfbrew(request, tea_id):
     if form.is_valid():
         brew = form.save(commit=False)
         brew.tea = tea
-        steep_times_string = form.clean_steep_times_string()
-        str_steep_times = re.split(',+', steep_times_string)
-        lst_steep_times = [int(x) for x in str_steep_times]
-        brew.steep_times = np.asarray(lst_steep_times)
+        brew.steep_times = get_steep_times(brew.steep_times_string)
         brew.steep_num = len(brew.steep_times)
         brew.save()
         return HttpResponseRedirect(reverse('tea:detail', args=[brew.tea.id]))
@@ -186,3 +167,52 @@ def register(request):
     else:
         form = RegisterForm()
     return render(request, 'tea/registration/register.html', {'form': form})
+
+
+def steep_gfbrew(request, brew_id):
+    brew = get_object_or_404(GongFuBrew, pk=brew_id)
+    title = "Brewing: " + brew.brew_name
+    steep_times = list()
+    for steep_time in enumerate(get_steep_times(brew.steep_times_string)):
+        steep_times.append(Steep.create(steep_time[0]+1, steep_time[1], False))
+    context = {
+        'brew': brew,
+        'tea': brew.tea,
+        'title': title,
+        'steep_times': steep_times
+    }
+    return render(request, 'tea/timer.html', context)
+
+
+def get_steep_times(steep_times_string):
+    str_steep_times = re.split(',+', steep_times_string)
+    lst_steep_times = [int(x) for x in str_steep_times]
+    return np.asarray(lst_steep_times)
+
+
+class Steep(models.Model):
+    order = models.IntegerField()
+    suffix = models.CharField()
+    time = models.IntegerField()
+    done = models.BooleanField()
+
+    def get_suffix(n):
+        ones_place = n%10
+        tens_place = n-ones_place
+        if tens_place is 10:
+            return "th"
+        elif ones_place is 1:
+            return "st"
+        elif ones_place is 2:
+            return "nd"
+        elif ones_place is 3:
+            return "rd"
+        else:
+            return "th"
+
+    @classmethod
+    def create(cls, order, time, done):
+        steep = cls(order=order, suffix=cls.get_suffix(order),time=time, done=done)
+        return steep
+
+

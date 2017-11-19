@@ -23,10 +23,11 @@ urlpatterns = [
 
     url(r'^(?P<tea_id>[0-9]+)/add_brew/$', views.create_gfbrew, name='gfbrew-add'),
 
-    url(r'^brew/(?P<pk>[0-9]+)/update/$', views.GongFuBrewUpdate.as_view(), name='gfbrew-update'),
+    url(r'^brew/(?P<pk>[0-9]+)/update/$', views.update_gfbrew, name='gfbrew-update'),
 
     url(r'^brew/(?P<brew_id>[0-9]+)/delete/$', views.delete_gfbrew, name='gfbrew-delete'),
 
+    url(r'^brew/(?P<brew_id>[0-9]+)/timer/$', views.steep_gfbrew, name='gfbrew-steep'),
 
 
     # url(r'^login/$', auth_views.login, name='login'),
